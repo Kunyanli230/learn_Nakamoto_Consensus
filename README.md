@@ -11,7 +11,9 @@
 ```
 go build -o bc.exe main.go
 ./bc.exe
-./bc createblockchainwithgenesis
+./bc createblockchain -data "随便写“
+./bc addblock -data "随便写“
+
 
 //测试完后记得删除db
 Remove-Item -Recurse -Force blockchain.db, bc.exe
