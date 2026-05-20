@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"log"
+	"encoding/json"
 )
 
 func IntTOHex(num int64) []byte {
@@ -13,4 +14,12 @@ func IntTOHex(num int64) []byte {
 		log.Panic(err)
 	}
 	return buff.Bytes()
+}
+
+func JSONToArray(jsonString string) []string {
+	var sArr []string
+	if err := json.Unmarshal([]byte(jsonString), &sArr); err != nil {
+		log.Panic(err)
+	} 
+	return sArr
 }

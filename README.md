@@ -10,10 +10,10 @@
 ## CLI用法
 ```
 go build -o bc.exe main.go
-./bc.exe
 ./bc createblockchain -data "随便写“
 ./bc addblock -data "随便写“
-
+./bc printchain
+./bc send -from '["Kunyan", "CZ"]' -to '["WU", "PP"]' -amount '["10000","30000"]'
 
 //测试完后记得删除db
 Remove-Item -Recurse -Force blockchain.db, bc.exe
