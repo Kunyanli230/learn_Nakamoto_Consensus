@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
+	"encoding/hex"
+	"fmt"
 	"log"
 )
 
@@ -14,19 +16,24 @@ type Transaction struct {
 
 	//2.输入
 	Vins []*TXInput
-	
+
 	//3.输出
 	Vouts []*TXOutput
 }
 
-//transaction创建分两种情况
+// 判断当前交易是否是Coinbase交易
+func (tx *Transaction) IsCoinbaseTransaction() bool {
+	return len(tx.Vins) == 1 && len(tx.Vins[0].TxHash) == 0 && tx.Vins[0].Vout == -1
+}
+
+// transaction创建分两种情况
 // 创世区块创建时的transaction
 func NewCoinbaseTransaction(address string) *Transaction {
-   
-	txInput := &TXInput{[]byte{}, -1,"Genesis Block"}
-	
+
+	txInput := &TXInput{[]byte{}, -1, "Genesis Block"}
+
 	txOuptut := &TXOutput{10, address}
-    
+
 	txCoinbase := &Transaction{[]byte{}, []*TXInput{txInput}, []*TXOutput{txOuptut}}
 
 	//设置hash值
@@ -48,3 +55,37 @@ func (tx *Transaction) HashTransaction() {
 }
 
 // 转账时产生的transaction
+
+func NewSimpleTransaction(from string, to string, amount int, blockchain *Blockchain) *Transaction {
+
+	// 有一个函数，返回一个数组里面是from这个人所有未花费输出所对应的Transaction
+	unUTXOs := blockchain.UnUTXOs(from)
+	fmt.Println(unUTXOs)
+	// 有一个函数，返回一个总共消费的钱int和一个字典
+	money, spendableUTXODic := blockchain.FindSpendableUTXOs(from, amount)
+
+	var txInputs []*TXInput
+	var txOutputs []*TXOutput
+	for txHash, indexArray := range spendableUTXODic {
+		txHashBytes, _ := hex.DecodeString(string(txHash))
+		//消费
+		for _, index := range indexArray {
+			txInput := &TXInput{txHashBytes, index, from}
+			txInputs = append(txInputs, txInput)
+		}
+	}
+
+	//转账
+	txOutput := &TXOutput{int64(amount), to}
+	txOutputs = append(txOutputs, txOutput)
+
+	//找零
+	txOutput = &TXOutput{int64(money) - int64(amount), from}
+	txOutputs = append(txOutputs, txOutput)
+
+	//设置hash
+	tx := &Transaction{[]byte{}, txInputs, txOutputs}
+	tx.HashTransaction()
+
+	return tx
+}

@@ -10,15 +10,23 @@
 ## CLI用法
 ```
 go build -o bc.exe main.go
-./bc createblockchain -data "随便写“
-./bc addblock -data "随便写“
+
+# 创建创世区块
+./bc createblockchain -address "Kunyan"
+
+# 查询余额
+./bc getbalance -address "Kunyan"
+
+# 转账（PowerShell 需用 \" 转义内层双引号）
+./bc send -from '[\"Kunyan\"]' -to '[\"WU\"]' -amount '[\"5\"]'
+
+./bc getbalance -address "WU"
+
+# 打印所有区块
 ./bc printchain
-./bc send -from '["Kunyan", "CZ"]' -to '["WU", "PP"]' -amount '["10000","30000"]'
 
-//测试完后记得删除db
+# 测试完后记得删除 db
 Remove-Item -Recurse -Force blockchain.db, bc.exe
-
-
 ```
 
 
