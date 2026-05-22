@@ -56,13 +56,13 @@ func (tx *Transaction) HashTransaction() {
 
 // 转账时产生的transaction
 
-func NewSimpleTransaction(from string, to string, amount int, blockchain *Blockchain) *Transaction {
+func NewSimpleTransaction(from string, to string, amount int, blockchain *Blockchain, txs []*Transaction) *Transaction {
 
 	// 有一个函数，返回一个数组里面是from这个人所有未花费输出所对应的Transaction
-	unUTXOs := blockchain.UnUTXOs(from)
+	unUTXOs := blockchain.UnUTXOs(from, txs)
 	fmt.Println(unUTXOs)
 	// 有一个函数，返回一个总共消费的钱int和一个字典
-	money, spendableUTXODic := blockchain.FindSpendableUTXOs(from, amount)
+	money, spendableUTXODic := blockchain.FindSpendableUTXOs(from, amount, txs)
 
 	var txInputs []*TXInput
 	var txOutputs []*TXOutput

@@ -18,7 +18,7 @@ go build -o bc.exe main.go
 ./bc getbalance -address "Kunyan"
 
 # 转账（PowerShell 需用 \" 转义内层双引号）
-./bc send -from '[\"Kunyan\"]' -to '[\"WU\"]' -amount '[\"5\"]'
+./bc send -from '[\"Kunyan\", \"Kunyan\", \"CZ\"]' -to '[\"WU\", \"CZ\", \"Kunyan\"]' -amount '[\"2\", \"3\", \"1\"]'
 
 ./bc getbalance -address "WU"
 
