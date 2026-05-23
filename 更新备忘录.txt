@@ -1,0 +1,53 @@
+## 用 AI vibe coding 把PoW改成别的共识算法（如 DAG-based， DPOS，PBFT...)
+
+你的实现更像“UTXO 记账模型的教学版”，和真正的 Bitcoin-style UTXO 主要差在这些地方：
+
+  1. 没有真正的所有权验证
+     你的 TXInput.ScriptSig 和 TXOutput.ScriptPubKey 都是字符串地址比较：
+     BLC/Transaction_TXinput.go:13、BLC/Transaction_TXoutput.go:8
+
+     真正的 UTXO 需要用私钥签名，节点用公钥或脚本验证：这个输入是否真的有权花费对应输出。你现在只要写 from = "Alice"，理
+     论上就能花 Alice 的钱。
+  2. 没有完整交易验证
+     真正 UTXO 会验证：
+     输入引用的输出存在；
+     输入还没被花过；
+     签名合法；
+     sum(inputs) >= sum(outputs)；
+     金额不能为负；
+     不能重复引用同一个 UTXO；
+     coinbase 有特殊规则。
+
+     你的核心逻辑在 BLC/Blockchain.go:24 和 BLC/Transaction.go:59，主要是“找到够用的钱然后构造输入输出”，还没有作为共识
+     规则去严格校验交易。
+  3. 没有维护真正的 UTXO Set
+     你每次查余额都会从最新区块往前扫全链：
+     BLC/Blockchain.go:60
+
+     真正系统通常会维护一个独立的 UTXO 数据库，新增区块时删除被花费的输出、加入新输出。这样查余额和验证交易不需要每次扫
+     整条链。
+  4. 交易 hash 不够标准
+     你的 HashTransaction 用 gob 编码整个交易：
+     BLC/Transaction.go:45
+
+     真实系统会使用确定性的交易序列化格式，并且计算 txid 时不会把当前 TxHash 字段本身也混进去。你这个实现第一次 hash 通
+     常能跑，但不是稳定的协议级交易 ID。
+  5. 没有手续费模型
+     真正 UTXO 中：
+
+     fee = inputs总额 - outputs总额
+
+     你的交易是：
+
+     输出 = 转账金额 + 找零
+
+     所以输入金额刚好全部退回，没有手续费概念。
+
+  6. 区块里交易关系处理还很弱
+     你的 BLC/Blockchain.go:132 实际只处理 from[0] to[0] amount[0] 一笔交易。真正区块会有很多交易，还要检查同一个区块内
+     的双花、交易依赖顺序、手续费优先级等。
+  7. 没有链重组和回滚
+     真正 UTXO set 必须支持最长链/最重链切换：旧块回滚，新块应用。你的链是单线追加，没有 fork/reorg 场景。
+
+  一句话总结：你的代码已经抓住了 UTXO 的核心形状：输出代表钱，输入引用旧输出，余额来自未花费输出。但真正的 UTXO 系统还需
+  要密码学签名、严格交易验证、UTXO Set 索引、手续费、区块内双花检查和链重组处理。

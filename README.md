@@ -30,4 +30,3 @@ Remove-Item -Recurse -Force blockchain.db, bc.exe
 ```
 
 
-## 用 AI vibe coding 把PoW改成别的共识算法（如 DAG-based， DPOS，PBFT...)
