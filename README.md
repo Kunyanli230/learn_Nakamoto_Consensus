@@ -18,15 +18,18 @@ go build -o bc.exe main.go
 ./bc getbalance -address "Kunyan"
 
 # 转账（PowerShell 需用 \" 转义内层双引号）
-./bc send -from '[\"Kunyan\", \"Kunyan\", \"CZ\"]' -to '[\"WU\", \"CZ\", \"Kunyan\"]' -amount '[\"2\", \"3\", \"1\"]'
+./bc send -from '[\" "]' -to '[\" "]' -amount '[\"2\"]'
 
-./bc getbalance -address "WU"
+./bc send -from '[\"1JjTSv7y4sqgSixUAV67cFcX4zGzJzz6EH\"]' -to '[\"1BPXKn98Xryng8YBirPwv6Gj79yjPduiK8\"]' -amount '[\"2\"]'
+
+
+./bc getbalance -address "1BPXKn98Xryng8YBirPwv6Gj79yjPduiK8"
 
 # 打印所有区块
 ./bc printchain
 
 # 测试完后记得删除 db
-Remove-Item -Recurse -Force blockchain.db, bc.exe
+Remove-Item -Recurse -Force blockchain.db, bc.exe, wallets.dat
 ```
 
 

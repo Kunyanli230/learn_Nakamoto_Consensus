@@ -1,6 +1,8 @@
 package BLC
 
 import (
+	"bytes"
+	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
 	"log"
@@ -20,7 +22,65 @@ type Blockchain struct {
 	DB  *bolt.DB
 }
 
-// 转账时查找可用的UTXO
+// 13.验证交易签名
+func (bc *Blockchain) VerifyTransaction(tx *Transaction) bool {
+	prevTXs := make(map[string]Transaction)
+
+	for _, vin := range tx.Vins {
+		prevTX, err := bc.FindTransaction(vin.TxHash)
+		if err != nil {
+			log.Panic(err)
+		}
+		prevTXs[hex.EncodeToString(prevTX.TxHash)] = prevTX
+	}
+
+	return tx.Verify(prevTXs)
+}
+
+// 12.签名交易
+func (blockchain *Blockchain) SignTransaction(tx *Transaction, privateKey ecdsa.PrivateKey) {
+
+	if tx.IsCoinbaseTransaction() {
+		return
+	}
+
+	prevTXs := make(map[string]Transaction)
+
+	for _, vin := range tx.Vins {
+		prevTX, err := blockchain.FindTransaction(vin.TxHash)
+		if err != nil {
+			log.Panic(err)
+		}
+		prevTXs[hex.EncodeToString(prevTX.TxHash)] = prevTX
+	}
+
+	tx.Sign(privateKey, prevTXs)
+}
+
+// 11.查找交易
+func (bc *Blockchain) FindTransaction(ID []byte) (Transaction, error) {
+	bci := bc.Iterator()
+
+	for {
+		block := bci.Next()
+		for _, tx := range block.Txs {
+			if bytes.Equal(tx.TxHash, ID) {
+				return *tx, nil
+			}
+		}
+
+		var hashInt big.Int
+		hashInt.SetBytes(block.PrevBlockHash)
+		if big.NewInt(0).Cmp(&hashInt) == 0 {
+			break
+		}
+
+	}
+
+	return Transaction{}, fmt.Errorf("transaction %x not found", ID)
+}
+
+// 10.转账时查找可用的UTXO
 func (blockchain *Blockchain) FindSpendableUTXOs(from string, amount int, txs []*Transaction) (int64, map[string][]int) {
 
 	//1.获取所有的UTXO
@@ -65,7 +125,10 @@ func (blockchain *Blockchain) UnUTXOs(address string, txs []*Transaction) []*UTX
 	for _, tx := range txs {
 		if tx.IsCoinbaseTransaction() == false {
 			for _, in := range tx.Vins {
-				if in.UnLockWithAddress(address) {
+				publicKeyHash := Base58Decode([]byte(address))
+				ripemd160Hash := publicKeyHash[1 : len(publicKeyHash)-4]
+
+				if in.UnLockRipemd160(ripemd160Hash) {
 					key := hex.EncodeToString(in.TxHash)
 					spentTXOutputs[key] = append(spentTXOutputs[key], in.Vout)
 				}
@@ -133,7 +196,10 @@ func (blockchain *Blockchain) UnUTXOs(address string, txs []*Transaction) []*UTX
 			//Vins
 			if tx.IsCoinbaseTransaction() == false {
 				for _, in := range tx.Vins {
-					if in.UnLockWithAddress(address) {
+					publicKeyHash := Base58Decode([]byte(address))
+					ripemd160Hash := publicKeyHash[1 : len(publicKeyHash)-4]
+
+					if in.UnLockRipemd160(ripemd160Hash) {
 						key := hex.EncodeToString(in.TxHash)
 						spentTXOutputs[key] = append(spentTXOutputs[key], in.Vout)
 					}
@@ -216,6 +282,13 @@ func (blockchain *Blockchain) MineNewBlock(from []string, to []string, amount []
 		return nil
 	})
 
+	// 建立新区块前需要对txs进行签名验证
+	for _, tx := range txs {
+		for blockchain.VerifyTransaction(tx) != true {
+			log.Panic("签名失败...")
+		}
+	}
+
 	// 建立新的区块
 	block = NewBlock(txs, block.Height+1, block.Hash)
 
@@ -282,13 +355,13 @@ func (blc *Blockchain) Printchain() {
 			for _, in := range tx.Vins {
 				fmt.Printf("%x\n", in.TxHash)
 				fmt.Printf("%d\n", in.Vout)
-				fmt.Printf("%s\n", in.ScriptSig)
+				fmt.Printf("%s\n", in.PublicKey)
 			}
 
 			fmt.Println("Vouts:")
 			for _, out := range tx.Vouts {
 				fmt.Println(out.Value)
-				fmt.Println(out.ScriptPubKey)
+				fmt.Println(out.Ripemd160Hash)
 			}
 
 		}
