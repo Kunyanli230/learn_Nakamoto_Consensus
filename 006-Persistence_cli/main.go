@@ -1,7 +1,7 @@
 package main
 
 import (
-	"publicChain/006-Persistence_cli/BLC"
+	"learn_Nakamoto_Consensus/006-Persistence_cli/BLC"
 )
 
 func main() {
