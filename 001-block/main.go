@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"publicChain/001-block/BLC"
+	"learn_Nakamoto_Consensus/001-block/BLC"
 )
 
 func main() {
