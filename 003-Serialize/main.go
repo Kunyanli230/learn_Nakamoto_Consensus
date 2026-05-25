@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"publicChain/003-Serialize/BLC"
+	"learn_Nakamoto_Consensus/003-Serialize/BLC"
 )
 
 func main() {
