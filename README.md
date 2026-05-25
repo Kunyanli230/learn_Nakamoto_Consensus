@@ -8,28 +8,65 @@
 * 建设中
 
 ## CLI用法
-```
+### 1. 构建 CLI
+
+```powershell
 go build -o bc.exe main.go
+```
 
-# 创建创世区块
-./bc createblockchain -address "Kunyan"
+### 2. 查看支持的命令
 
-# 查询余额
-./bc getbalance -address "Kunyan"
+```powershell
+./bc.exe
+```
 
-# 转账（PowerShell 需用 \" 转义内层双引号）
-./bc send -from '[\" "]' -to '[\" "]' -amount '[\"2\"]'
+### 3. 创建钱包
 
-./bc send -from '[\"1JjTSv7y4sqgSixUAV67cFcX4zGzJzz6EH\"]' -to '[\"1BPXKn98Xryng8YBirPwv6Gj79yjPduiK8\"]' -amount '[\"2\"]'
+先创建至少两个钱包地址，一个作为创世区块奖励地址，一个作为收款地址。
+
+```powershell
+./bc.exe createwallet
+./bc.exe createwallet
+./bc.exe createwallet
+```
 
 
-./bc getbalance -address "1BPXKn98Xryng8YBirPwv6Gj79yjPduiK8"
+```powershell
+./bc.exe addresslists
+```
 
-# 打印所有区块
-./bc printchain
+### 4. 创建区块链
 
-# 测试完后记得删除 db
-Remove-Item -Recurse -Force blockchain.db, bc.exe, wallets.dat
+```powershell
+./bc.exe createblockchain -address "<创世区块奖励地址>"
+```
+
+调试的时候可以用这里：
+钱包一：
+钱包二：
+钱包三：
+
+### 5. 查询余额
+
+```powershell
+./bc.exe getbalance -address "<钱包地址>"
+```
+
+### 6. 转账
+
+```powershell
+./bc.exe send -from '[\"钱包一\",\"钱包一\"]' -to '[\"钱包二\",\"钱包三\"]' -amount '[\"2\",\"3\"]'
+
+```
+### 7. 打印区块链
+
+```powershell
+./bc.exe printchain
+```
+
+### 8. 清理本地运行文件
+```powershell
+Remove-Item -Force blockchain.db, bc.exe, wallets.dat
 ```
 
 
