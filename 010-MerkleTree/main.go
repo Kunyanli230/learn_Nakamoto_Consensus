@@ -1,7 +1,7 @@
 package main
 
 import (
-	"publicChain/010-MerkleTree/BLC"
+	"learn_Nakamoto_Consensus/010-MerkleTree/BLC"
 )
 
 func main() {
