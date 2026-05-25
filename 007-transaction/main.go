@@ -1,7 +1,7 @@
 package main
 
 import (
-	"publicChain/007-transaction/BLC"
+	"learn_Nakamoto_Consensus/007-transaction/BLC"
 )
 
 func main() {
