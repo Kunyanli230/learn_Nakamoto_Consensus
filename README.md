@@ -1,4 +1,4 @@
-# 🧱 Learn Nakamoto Style Consensus in 11 Days
+# 🧱 Learn Nakamoto Style Consensus in 11 Days 🧱 用11天学会中本聪共识协议
 
 This repo is designed as an **11-day, 11-stage learning project** for understanding and implementing Nakamoto style consensus from the ground up.
 
