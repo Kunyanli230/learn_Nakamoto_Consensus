@@ -1,7 +1,7 @@
 package main
 
 import (
-	"publicChain/008-Wallet/BLC"
+	"learn_Nakamoto_Consensus/008-Wallet/BLC"
 )
 
 func main() {
