@@ -1,4 +1,4 @@
-module publicChain
+module learn_Nakamoto_Consensus
 
 go 1.25.9
 
